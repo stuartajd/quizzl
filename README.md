@@ -9,10 +9,13 @@ Demo: https://dev.stuartd.co.uk/quizzler/
 
 The JSON is a standard format and has the following parameters.
 
-question - string - The question that will be displayed on the page. (Does not require trailing question mark)
-answers - Array of strings - All answers as they appear on the page. Must have atleast 1 answer; can have as many as required.
-correct - integer - The index to the correct answer from the answers array.
-image (not required) - string - Image to display along with the current question. (Max 150px x 250px).
+| Attribute        | Type           |  Description  |
+| ------------- | ------------- | ------------- |
+| question      | String | The question that will be displayed on the page. (Does not require trailing question mark) |
+| answers      | Array of Strings     |   All answers as they appear on the page. Must have atleast 1 answer; can have as many as required. |
+| correct | Integer      |    The index to the correct answer from the answers array. |
+| image | String      |  Image to display along with the current question. (Max 150px x 250px). Not required.|
+
 
 ## Simple question example JSON
 ```javascript
