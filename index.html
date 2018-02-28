@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Quizzler</title>
+
+	<link href="https://fonts.googleapis.com/css?family=Indie+Flower|Roboto" rel="stylesheet">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+	<style>
+		body{
+			background-color: #3BAFDA;
+			color: white;
+			font-family: 'Roboto', sans-serif;
+		}
+
+		a {
+			color: white;
+		}
+
+		h1 {
+			font-family: 'Indie Flower', cursive;
+			font-size: 3em;
+		}
+
+		[v-cloak]{
+			display: none;
+		}
+
+		.settings {
+			border-top: 2px solid white;
+			padding-top: 10px;
+		}
+		
+		.fade-enter-active, .fade-leave-active {
+		  	transition: opacity .5s;
+		}
+		.fade-enter, .fade-leave-to {
+		  	opacity: 0;
+		}
+
+		.error {
+			border: 2px solid red;
+		}
+	</style>
+</head>
+<body>
+	
+	<div id='quizzler' class='container pt-5'>
+
+		<div v-cloak v-if='quiz.length == 0' class='text-center pt-5'>
+			<h1>Quizzler</h1>
+			<p>Welcome to Quizzler, to start upload your question package. <small>[<span v-on:click='showSettings'>Learn More</span>]</small></p>
+
+			<div class="row justify-content-md-center">
+				<div class="col-8">
+					
+					<div class="form-group mt-5">
+						<textarea class='form-control' name='uploadQuestions' v-model='quizInput' placeholder='Upload Questions, click Learn More to find out how to create a quiz.' rows='5' v-bind:class="{ error: quizInputError }"></textarea>
+
+						<button type='button' v-on:click='checkQuiz' class='mt-3 btn btn-outline-light'>Begin</button>
+
+					</div>
+
+					<transition name="fade">
+					<div v-if='settingsDisplay' class='settings text-left'>
+						<p>Quizzler uses a standard JSON object to store the each question. Using the format below you can setup a quiz.</p>
+
+<pre><code>
+[{
+	"question": "What is an animal starting with the letter C",
+	"answers": [ "cat", "dog", "sheep", "monkey"],
+	"correct": 0
+}]
+</code></pre>
+
+<p>You can also include small images for the questions, these will appear below the question but above the answers and are restricted to 150 height by 250 width. Append these into the JSON object.</p>
+
+<pre><code>
+[{
+	"question": "What is an animal starting with the letter C",
+	"image": "https://i.ytimg.com/vi/69Zo05WeIF0/maxresdefault.jpg",
+	"answers": [ "cat", "dog", "sheep", "monkey"],
+	"correct": 0
+}]
+</code></pre>
+
+					</div>
+					</transition>
+				</div>
+			</div>	
+			
+			<div class='text-center mt-5 pt-5'>
+				<small><a href="https://github.com/stuartajd/quizzler" target="_blank">View me on GitHub</a></small>
+			</div>
+		</div>
+
+		<div v-else>
+			<div v-cloak v-if='!quizEnd'>
+				<h1>Quizzler</h1>
+
+				<div v-if='index == question' v-for='(quest, index) in quiz' class='text-center'>
+					<h2 class='mt-2'>{{quest.question}}?</h2>
+
+					<img v-if='quest.image' v-bind:src='quest.image' class='mt-1' style='max-width: 250px; max-height: 150px; height: auto'>
+
+					<div class="row mt-1">
+						<div class="col-6" v-for='(ans, ind) in quest.answers'>
+							<button type='button' class='btn btn-outline-light d-block mt-1 w-100' v-on:click='answer(ind)'>{{ans}}</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div v-cloak v-if='quizEnd' class='text-center pt-5'>
+				<h1>Quizzler</h1>
+
+				<p>You've now completed the quiz, congratulations.</p>
+
+				<h3>You got {{calculateScore}} correct out of a possible {{quiz.length}}. That's {{calculatePercent}}%</h3>
+				
+
+				<div v-if='getIncorrectAnswers.length' class='text-right'>
+					[<small v-on:click='showIncorrect'>View Incorrect Answers</small>]
+				</div>
+
+				<transition name='fade'>
+				<div v-if='incorrectDisplay' class='text-left settings mt-5 pt-2'>
+					<h3>Incorrect Answers:</h3>
+					<div v-for='que in getIncorrectAnswers'>
+						<strong>Question:</strong> {{que.question}}?<br />
+						<strong>You answered:</strong> {{que.answers[que.answered]}}.<br />
+						<strong>The correct answer:</strong> {{que.answers[que.correct]}}.<br />
+
+						<hr />
+					</div>
+				</div>
+				</transition>
+			</div>
+		</div>
+
+	</div>
+	
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.min.js"></script>
+	<script>
+		var Quizzler = new Vue({
+			el: '#quizzler',
+			data: {
+				quiz: [],
+				question: 0,
+				quizInput: '',
+				quizInputError: false,
+				quizEnd: false,
+				settingsDisplay: false,
+				incorrectDisplay: false
+			},
+			computed: {
+				calculateScore: function(){
+					return this.quiz.filter(el => el.correct == el.answered).length;
+				},
+				calculatePercent: function(){
+					return (this.calculateScore / this.quiz.length) * 100;
+				},
+				getIncorrectAnswers: function(){
+					return this.quiz.filter(el => el.correct != el.answered);
+				}
+			},
+			methods: {
+				showSettings: function(){
+					this.settingsDisplay = !this.settingsDisplay;
+				},
+				showIncorrect: function(){
+					this.incorrectDisplay = !this.incorrectDisplay;
+				},
+				answer: function(index){
+					this.quiz[this.question].answered = index;
+
+					//No next question
+					if(!this.quiz[this.question+1]){
+						this.quizEnd = true;
+					} else {
+						this.question++;
+					}
+
+					console.log(this._data);
+
+				},
+				checkQuiz: function(){
+					this.quizInput = this.quizInput.trim();
+					if(!this.quizInput.length){
+						this.quizInputError = true; 
+						return;
+					}
+
+					try{
+						var jsonInput = JSON.parse(this.quizInput);
+					} catch(e){
+						this.quizInputError = true;
+						return;
+					}
+
+					for(let qz of jsonInput){
+						if(!qz.question.length) return;
+						if(!qz.answers.length) return;
+						if(!qz.answers[qz.correct].length) return;
+						qz.answered = false;
+						this.quiz.push(qz);
+					}
+					
+					if(this.quiz.length > 1){
+						for (let i = this.quiz.length - 1; i > 0; i--) {
+					        let j = Math.floor(Math.random() * (i + 1));
+					        [this.quiz[i], this.quiz[j]] = [this.quiz[j], this.quiz[i]];
+					    }
+					}
+				}
+			}
+		});
+	</script>
+
+</body>
+</html>
