@@ -1,49 +1,7 @@
-# Quizzler
-VueJS based Quiz system.
+<center>![Quizzl.me Logo](https://u.stuartd.co.uk/images/ZGQ2NzdjYmFkMGY.png)
 
-Import questions from JSON and formats & returns end question result.
+A simple to use quiz system built with VueJS.
 
-Demo: https://dev.stuartd.co.uk/quizzler/
+Official Platform: [www.quizzl.me](https://www.quizzl.me/)
 
-## Parameters
-
-The JSON is a standard format and has the following parameters.
-
-| Attribute        | Type           |  Description  |
-| ------------- | ------------- | ------------- |
-| question      | String | The question that will be displayed on the page. (Does not require trailing question mark) |
-| answers      | Array of Strings     |   All answers as they appear on the page. Must have atleast 1 answer; can have as many as required. |
-| correct | Integer      |    The index to the correct answer from the answers array. |
-| image | String      |  Image to display along with the current question. (Max 150px x 250px). Not required.|
-
-
-## Simple question example JSON
-```javascript
-[{
-	"question": "What is an animal starting with the letter C",
-	"answers": [ "cat", "dog", "sheep", "monkey"],
-	"correct": 0
-}]
-
-```
-
-## Multiple questions example JSON
-
-```javascript
-[{
-	"question": "What is the capital of France",
-	"answers": [ "London", "Paris", "Rome" ],
-	"correct": 1
-},
-{
-	"question": "How many continents are there in the world",
-	"answers": [ "1", "4", "5", "7" ],
-	"correct": 3
-},
-{
-	"question": "How many legs does a spider typically have",
-	"answers": [ "7", "8" ],
-	"correct": 1
-}]
-
-```
+View the wiki: [Quizzl Wiki](https://github.com/stuartajd/quizzl/wiki)</center>
