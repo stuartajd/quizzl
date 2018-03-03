@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Quizzler</title>
+	<title>~ Quizzl.me ~</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link href="https://fonts.googleapis.com/css?family=Indie+Flower|Roboto" rel="stylesheet">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
@@ -32,14 +32,6 @@
 			padding-top: 10px;
 		}
 		
-		.fade-enter-active, .fade-leave-active {
-		  	transition: opacity .5s;
-		}
-
-		.fade-enter, .fade-leave-to {
-		  	opacity: 0;
-		}
-
 		.error {
 			border: 2px solid red;
 		}
@@ -57,14 +49,14 @@
 <body>
 	
 	<header class='pt-5 pb-5 text-center'>
-		<h1>Quizzler</h1>
+		<h1>Quizzl.me</h1>
 	</header>
 
-	<div id='quizzler' class="container">
+	<div id='quizzl' class="container">
 		<!-- INTRODUCTION VIEW -->
 		<div v-cloak v-if='status == "introduction"'>
 			
-			<p class='text-center'>Welcome to Quizzler, a simple and custom quiz system for multiple choice questions.</p>
+			<p class='text-center'>Welcome to Quizzl.me, a simple and custom quiz system for multiple choice questions.</p>
 			
 			<br />
 
@@ -74,11 +66,11 @@
 					<p>Take your pick from the different question sets below.</p>
 
 					<select class="form-control w-100" v-model='quizInput'>
-						<option value='' disabled selected>Select an official Quizzler quiz set.</option>
+						<option value='' disabled selected>Select an official Quizzl quiz set.</option>
 						<option v-for='que in quizSets' v-bind:value='que.JSON'>{{que.name}}</option>
 				    </select><br />
 
-				    <p>Upload your own questions, using a specific format.</p>
+				    <p>Upload your own questions, using a specific format (<a href='https://github.com/stuartajd/quizzl/wiki/Quizzl-Custom-Quiz-Structure' target="_blank">found here</a>).</p>
 
 				   	<textarea v-model='quizInput' v-bind:class='{error: quizInputError}' class='form-control w-100' placeholder='Quiz Question Set'></textarea>
 				    <p class='d-block text-right' style='color: red'>{{quizInputErrorMessage}}</p>
@@ -95,7 +87,7 @@
 
 		<!-- DESCRIPTION VIEW -->
 		<div v-cloak v-if='status == "description"'>
-			<p class='text-center'>Welcome to Quizzler, a simple and custom quiz system for multiple choice questions.</p>
+			<p class='text-center'>Welcome to Quizzl.me, a simple and custom quiz system for multiple choice questions.</p>
 			
 			<br />
 
@@ -173,18 +165,18 @@
 	<footer style='background-color: #087CA7;' class='mt-5'>
 		<div class="container pt-3 pb-2 text-center">
 			<p style='font-size: 14px;'>
-				<a href='https://github.com/stuartajd/quizzler' target='_blank'>View on GitHub</a> 
+				<a href='https://github.com/stuartajd/quizzl' target='_blank'>Quizzl.me</a> 
 				~
-				<a href='https://github.com/stuartajd/quizzler' target='_blank'>Submit Question Set</a>
+				<a href='https://github.com/stuartajd/quizzl/wiki/Submit-Quizzl-Question-Set' target='_blank'>Submit Official Question Set</a>
 			</p>
 		</div>
 	</footer>
 	
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js'></script>
-	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.min.js"></script>
 	<script>
-		var Quizzler = new Vue({
-			el: '#quizzler',
+		var Quizzl = new Vue({
+			el: '#quizzl',
 			data: {
 				status: 'introduction',
 				about: {
@@ -209,16 +201,24 @@
 				},
 				settingsDisplay: false
 			},
-			filter: {
+			filters: {
 				formatNumber: function(value){
 					return (value > 10) ? value : '0' + value;
 				}
 			},
 			created: function(){
 				var _this = this;
-				axios.get('https://dev.stuartd.co.uk/quizzler/api.json')
+
+				axios.get('https://www.quizzl.me/api')
 		  		.then(function (response) {
 		  			_this.quizSets = response.data;
+			  	
+		  			if(_this.getURLSlug()){
+		  				var slug = _this.quizSets.filter(el => el.uid == _this.getURLSlug())[0];	
+		  				if(!slug) return;
+		  				_this.quizInput = slug.JSON;
+		  				_this.checkQuiz();
+		  			}
 			  	});
 			},
 			computed: {
@@ -243,6 +243,9 @@
 				}
 			},
 			methods: {
+				getURLSlug: function(){
+					return (window.location.pathname.slice(1));
+				},
 				restart: function(){
 					window.location.reload();
 					return;
@@ -276,7 +279,6 @@
 				},
 				updateTimeRemaining: function(){
 					if(!this.timer.minutes && !this.timer.seconds){
-						// Run out of time
 						for(var ans of this.getUnansweredQuestions){
 							ans.answered = false;
 						}
