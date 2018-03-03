@@ -3,10 +3,10 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Quizzler</title>
-
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link href="https://fonts.googleapis.com/css?family=Indie+Flower|Roboto" rel="stylesheet">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 	<style>
 		body{
 			background-color: #3BAFDA;
@@ -35,6 +35,7 @@
 		.fade-enter-active, .fade-leave-active {
 		  	transition: opacity .5s;
 		}
+
 		.fade-enter, .fade-leave-to {
 		  	opacity: 0;
 		}
@@ -42,153 +43,263 @@
 		.error {
 			border: 2px solid red;
 		}
+
+		footer a {
+			color: white;
+		}
+
+		footer a:hover {
+			color: white;
+			text-decoration: underline;
+		}
 	</style>
 </head>
 <body>
 	
-	<div id='quizzler' class='container pt-5'>
+	<header class='pt-5 pb-5 text-center'>
+		<h1>Quizzler</h1>
+	</header>
 
-		<div v-cloak v-if='quiz.length == 0' class='text-center pt-5'>
-			<h1>Quizzler</h1>
-			<p>Welcome to Quizzler, to start upload your question package. <small>[<span v-on:click='showSettings'>Learn More</span>]</small></p>
-
-			<div class="row justify-content-md-center">
-				<div class="col-8">
-					
-					<div class="form-group mt-5">
-						<textarea class='form-control' name='uploadQuestions' v-model='quizInput' placeholder='Upload Questions, click Learn More to find out how to create a quiz.' rows='5' v-bind:class="{ error: quizInputError }"></textarea>
-
-						<button type='button' v-on:click='checkQuiz' class='mt-3 btn btn-outline-light'>Begin</button>
-
-					</div>
-
-					<transition name="fade">
-					<div v-if='settingsDisplay' class='settings text-left'>
-						<p>Quizzler uses a standard JSON object to store the each question. Using the format below you can setup a quiz.</p>
-
-<pre><code>
-[{
-	"question": "What is an animal starting with the letter C",
-	"answers": [ "cat", "dog", "sheep", "monkey"],
-	"correct": 0
-}]
-</code></pre>
-
-<p>You can also include small images for the questions, these will appear below the question but above the answers and are restricted to 150 height by 250 width. Append these into the JSON object.</p>
-
-<pre><code>
-[{
-	"question": "What is an animal starting with the letter C",
-	"image": "https://i.ytimg.com/vi/69Zo05WeIF0/maxresdefault.jpg",
-	"answers": [ "cat", "dog", "sheep", "monkey"],
-	"correct": 0
-}]
-</code></pre>
-
-					</div>
-					</transition>
-				</div>
-			</div>	
+	<div id='quizzler' class="container">
+		<!-- INTRODUCTION VIEW -->
+		<div v-cloak v-if='status == "introduction"'>
 			
-			<div class='text-center mt-5 pt-5'>
-				<small><a href="https://github.com/stuartajd/quizzler" target="_blank">View me on GitHub</a></small>
+			<p class='text-center'>Welcome to Quizzler, a simple and custom quiz system for multiple choice questions.</p>
+			
+			<br />
+
+			<div class="row">
+				<div class="col-6">
+					<h2>1. Set your questions..</h2>
+					<p>Take your pick from the different question sets below.</p>
+
+					<select class="form-control w-100" v-model='quizInput'>
+						<option value='' disabled selected>Select an official Quizzler quiz set.</option>
+						<option v-for='que in quizSets' v-bind:value='que.JSON'>{{que.name}}</option>
+				    </select><br />
+
+				    <p>Upload your own questions, using a specific format.</p>
+
+				   	<textarea v-model='quizInput' v-bind:class='{error: quizInputError}' class='form-control w-100' placeholder='Quiz Question Set'></textarea>
+				    <p class='d-block text-right' style='color: red'>{{quizInputErrorMessage}}</p>
+				</div>	
+
+				<div class="col-6">
+					<h2>2. Load the quiz..</h2>
+					<p>Click the button below to load the quiz and begin.</p>
+
+					<button type='button' class='btn btn-outline-light d-block w-50 mx-auto' v-on:click='checkQuiz'>Load Quiz</button>
+				</div>
 			</div>
 		</div>
 
-		<div v-else>
-			<div v-cloak v-if='!quizEnd'>
-				<h1>Quizzler</h1>
+		<!-- DESCRIPTION VIEW -->
+		<div v-cloak v-if='status == "description"'>
+			<p class='text-center'>Welcome to Quizzler, a simple and custom quiz system for multiple choice questions.</p>
+			
+			<br />
 
-				<div v-if='index == question' v-for='(quest, index) in quiz' class='text-center'>
-					<h2 class='mt-2'>{{quest.question}}?</h2>
+			<div class="row">
+				<div class="col-6">
+					<h2>3. Quiz information..</h2>
 
-					<img v-if='quest.image' v-bind:src='quest.image' class='mt-1' style='max-width: 250px; max-height: 150px; height: auto'>
+					<h4>{{about.description}}</h4>
 
-					<div class="row mt-1">
-						<div class="col-6" v-for='(ans, ind) in quest.answers'>
-							<button type='button' class='btn btn-outline-light d-block mt-1 w-100' v-on:click='answer(ind)'>{{ans}}</button>
-						</div>
+					<ul>
+						<li>This quiz has {{quizQuestions.length}} questions<span v-if='about.questionLimit != 0'>, you will only be asked {{about.questionLimit}} questions</span>.</li>
+						<li>You have {{getTimelimit}} minutes to complete the quiz. After this time your quiz score will be calculated.</li>
+						<li>Skip has been <span v-if='about.allowSkip'>enabled</span><span v-else>disabled</span> for this quiz.</li>
+						<li>Back has been <span v-if='about.allowBack'>enabled</span><span v-else>disabled</span> for this quiz.</li>
+					</ul>
+				</div>
+
+				<div class="col-6">
+					<h2>4. Begin the quiz..</h2>
+
+					<p>Now it's time to start the quiz, the timer starts when you press the button below. Good luck!</p>
+					
+					<button type='button' class='btn btn-outline-light d-block w-25 mx-auto' v-on:click='startQuiz'>Start Quiz</button>
+				</div>
+			</div>			
+			
+		</div>
+
+		<!-- QUIZ VIEW -->
+		<div v-cloak v-if='status == "quiz"'>
+			
+			<div v-if='index == question && !quizEnd' v-for='(quest, index) in quizQuestions' class='text-center'>
+				<small class='d-block text-right' v-if='about.timeLimit'>{{timer.minutes}}:{{timer.seconds | formatNumber}} remaining.</small>
+
+				<h2 class='mt-2 mb-4'>{{quest.question}}?</h2>
+
+				<img v-if='quest.image' v-bind:src='quest.image' class='mt-1' style='max-width: 250px; max-height: 150px; height: auto'>
+
+				<div class="row mt-1">
+					<div class="col-6" v-for='(ans, ind) in quest.answers'>
+						<button type='button' class='btn btn-outline-light d-block mt-1 w-100' v-on:click='answer(ind)'>{{ans}}</button>
+					</div>
+				</div>
+
+				<div class='row mt-3'>
+					<div class="col-3">
+						<button type='button' class='btn btn-outline-danger d-block w-100' v-on:click='back()'>Previous Question</button>
+					</div>
+					<div class="col-6">&nbsp;</div>
+					<div class="col-3 text-right">
+						<button type='button' class='btn btn-outline-warning d-block w-100' v-on:click='answer("skip")'>Skip Question</button>
 					</div>
 				</div>
 			</div>
 
-			<div v-cloak v-if='quizEnd' class='text-center pt-5'>
-				<h1>Quizzler</h1>
+			<div v-if='quizEnd'>
+				<h2>5. End the quiz..</h2>
+				<h4 class='text-center'>You got {{calculateScore}} correct out of a possible {{quizQuestions.length}}. That's {{calculatePercent}}%</h4><br />
+					
+				<button type='button' class='d-block w-25 mx-auto btn btn-outline-success' v-on:click='restart()'>Start Again</button>
 
-				<p>You've now completed the quiz, congratulations.</p>
-
-				<h3>You got {{calculateScore}} correct out of a possible {{quiz.length}}. That's {{calculatePercent}}%</h3>
-				
-
-				<div v-if='getIncorrectAnswers.length' class='text-right'>
-					[<small v-on:click='showIncorrect'>View Incorrect Answers</small>]
-				</div>
-
-				<transition name='fade'>
-				<div v-if='incorrectDisplay' class='text-left settings mt-5 pt-2'>
-					<h3>Incorrect Answers:</h3>
-					<div v-for='que in getIncorrectAnswers'>
+				<div class='row mt-3' v-if='getIncorrectAnswers.length'>
+					<div v-for='que in getIncorrectAnswers' class='col-6'>
 						<strong>Question:</strong> {{que.question}}?<br />
-						<strong>You answered:</strong> {{que.answers[que.answered]}}.<br />
+						<strong>You answered:</strong> <span v-if='!que.answers[que.answered]'>Skipped</span><span v-else>{{que.answers[que.answered]}}</span>.<br />
 						<strong>The correct answer:</strong> {{que.answers[que.correct]}}.<br />
-
 						<hr />
 					</div>
 				</div>
-				</transition>
 			</div>
+			
 		</div>
-
 	</div>
+
+	<footer style='background-color: #087CA7;' class='mt-5'>
+		<div class="container pt-3 pb-2 text-center">
+			<p style='font-size: 14px;'>
+				<a href='https://github.com/stuartajd/quizzler' target='_blank'>View on GitHub</a> 
+				~
+				<a href='https://github.com/stuartajd/quizzler' target='_blank'>Submit Question Set</a>
+			</p>
+		</div>
+	</footer>
 	
-	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.min.js"></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js'></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
 	<script>
 		var Quizzler = new Vue({
 			el: '#quizzler',
 			data: {
+				status: 'introduction',
+				about: {
+					description: '',
+					timeLimit: 0,
+					questionLimit: 0,
+					allowSkip: false,
+					allowBack: false,
+					randomise: false,
+				},
 				quiz: [],
+				quizSets: [],
 				question: 0,
 				quizInput: '',
 				quizInputError: false,
+				quizInputErrorMessage: '',
 				quizEnd: false,
-				settingsDisplay: false,
-				incorrectDisplay: false
+				timer: {
+					timer: null,
+					minutes: 00,
+					seconds: 00,
+				},
+				settingsDisplay: false
+			},
+			filter: {
+				formatNumber: function(value){
+					return (value > 10) ? value : '0' + value;
+				}
+			},
+			created: function(){
+				var _this = this;
+				axios.get('https://dev.stuartd.co.uk/quizzler/api.json')
+		  		.then(function (response) {
+		  			_this.quizSets = response.data;
+			  	});
 			},
 			computed: {
 				calculateScore: function(){
-					return this.quiz.filter(el => el.correct == el.answered).length;
+					return this.quizQuestions.filter(el => el.correct == el.answered).length;
 				},
 				calculatePercent: function(){
-					return (this.calculateScore / this.quiz.length) * 100;
+					return parseInt((this.calculateScore / this.quizQuestions.length) * 100);
 				},
 				getIncorrectAnswers: function(){
-					return this.quiz.filter(el => el.correct != el.answered);
+					return this.quizQuestions.filter(el => el.correct != el.answered);
+				},
+				getUnansweredQuestions: function(){
+					return this.quizQuestions.filter(el => !el.answered);
+				},
+				getTimelimit: function(){
+					return (this.about.timeLimit == 0) ? 'unlimited' : this.about.timeLimit;
+				},
+				quizQuestions: function(){
+					if(!this.about.questionLimit) return this.quiz;
+					return this.quiz.splice(0, this.about.questionLimit);
 				}
 			},
 			methods: {
+				restart: function(){
+					window.location.reload();
+					return;
+				},
 				showSettings: function(){
 					this.settingsDisplay = !this.settingsDisplay;
 				},
-				showIncorrect: function(){
-					this.incorrectDisplay = !this.incorrectDisplay;
+				back: function(){
+					if(!this.quizQuestions[this.question-1]) return;
+					this.question--;
 				},
 				answer: function(index){
-					this.quiz[this.question].answered = index;
+					this.quizQuestions[this.question].answered = (index == 'skip') ? false : index;
 
-					//No next question
-					if(!this.quiz[this.question+1]){
+					if(!this.quizQuestions[this.question+1]){
+						if(this.timer.timer){
+							clearInterval(this.timer.timer);
+						}
 						this.quizEnd = true;
 					} else {
 						this.question++;
 					}
+				},
+				startQuiz: function(){
+					if(this.about.timeLimit){
+						this.timer.minutes = this.about.timeLimit;
+						this.timer.timer = setInterval(this.updateTimeRemaining, 1000);
+					}
 
-					console.log(this._data);
+					this.status = 'quiz';
+				},
+				updateTimeRemaining: function(){
+					if(!this.timer.minutes && !this.timer.seconds){
+						// Run out of time
+						for(var ans of this.getUnansweredQuestions){
+							ans.answered = false;
+						}
+						this.quizEnd = true;
+						clearInterval(this.timer.timer);
+						return;
+					}
 
+					if(this.timer.seconds == 0){
+						this.timer.minutes--;
+						this.timer.seconds = 59;
+					}
+
+					this.timer.seconds--;
 				},
 				checkQuiz: function(){
+					this.quizInputError = false;
+					this.quizInputErrorMessage = '';
+
 					this.quizInput = this.quizInput.trim();
 					if(!this.quizInput.length){
 						this.quizInputError = true; 
+						this.quizInputErrorMessage = 'Quiz input is required.';
 						return;
 					}
 
@@ -196,10 +307,29 @@
 						var jsonInput = JSON.parse(this.quizInput);
 					} catch(e){
 						this.quizInputError = true;
+						this.quizInputErrorMessage = 'Quiz input is an incorrect format.';
 						return;
 					}
 
-					for(let qz of jsonInput){
+					if(!jsonInput.quiz.length){
+						this.quizInputError = true;
+						this.quizInputErrorMessage = 'No questions found in the quiz.';
+					}
+
+					if(!jsonInput.about){
+						this.quizInputError = true;
+						this.quizInputErrorMessage = 'No quiz information found.';
+						return;
+					}
+
+					this.about.description 	= jsonInput.about.description || 'No description has been set for this quiz.';
+					this.about.timeLimit 	= jsonInput.about.timeLimit || 0;
+					this.about.questionLimit= jsonInput.about.questionLimit || 0;
+					this.about.allowSkip 	= jsonInput.about.allowSkip || false;
+					this.about.allowBack 	= jsonInput.about.allowBack || false;
+					this.about.randomise	= jsonInput.about.randomise || false;
+
+					for(let qz of jsonInput.quiz){
 						if(!qz.question.length) return;
 						if(!qz.answers.length) return;
 						if(!qz.answers[qz.correct].length) return;
@@ -207,12 +337,14 @@
 						this.quiz.push(qz);
 					}
 					
-					if(this.quiz.length > 1){
+					if(this.about.randomise && this.quiz.length > 1){
 						for (let i = this.quiz.length - 1; i > 0; i--) {
 					        let j = Math.floor(Math.random() * (i + 1));
 					        [this.quiz[i], this.quiz[j]] = [this.quiz[j], this.quiz[i]];
 					    }
 					}
+
+					this.status = 'description';
 				}
 			}
 		});
