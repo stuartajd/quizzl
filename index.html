@@ -319,9 +319,7 @@
 					}
 
 					if(!jsonInput.about){
-						this.quizInputError = true;
-						this.quizInputErrorMessage = 'No quiz information found.';
-						return;
+						jsonInput.about = '';
 					}
 
 					this.about.description 	= jsonInput.about.description || 'No description has been set for this quiz.';
