@@ -61,7 +61,7 @@
 			<br />
 
 			<div class="row">
-				<div class="col-6">
+				<div class="col-sm-12 col-md-6">
 					<h2>1. Set your questions..</h2>
 					<p>Take your pick from the different question sets below.</p>
 
@@ -76,7 +76,7 @@
 				    <p class='d-block text-right' style='color: red'>{{quizInputErrorMessage}}</p>
 				</div>	
 
-				<div class="col-6">
+				<div class="col-sm-12 col-md-6">
 					<h2>2. Load the quiz..</h2>
 					<p>Click the button below to load the quiz and begin.</p>
 
@@ -92,7 +92,7 @@
 			<br />
 
 			<div class="row">
-				<div class="col-6">
+				<div class="col-sm-12 col-md-6">
 					<h2>3. Quiz information..</h2>
 
 					<h4>{{about.description}}</h4>
@@ -105,7 +105,7 @@
 					</ul>
 				</div>
 
-				<div class="col-6">
+				<div class="col-sm-12 col-md-6">
 					<h2>4. Begin the quiz..</h2>
 
 					<p>Now it's time to start the quiz, the timer starts when you press the button below. Good luck!</p>
@@ -127,7 +127,7 @@
 				<img v-if='quest.image' v-bind:src='quest.image' class='mt-1' style='max-width: 250px; max-height: 150px; height: auto'>
 
 				<div class="row mt-1">
-					<div class="col-6" v-for='(ans, ind) in quest.answers'>
+					<div class="col-sm-12 col-md-6" v-for='(ans, ind) in quest.answers'>
 						<button type='button' class='btn btn-outline-light d-block mt-1 w-100' v-on:click='answer(ind)'>{{ans}}</button>
 					</div>
 				</div>
@@ -136,7 +136,7 @@
 					<div class="col-3">
 						<button type='button' class='btn btn-outline-danger d-block w-100' v-on:click='back()'>Previous Question</button>
 					</div>
-					<div class="col-6">&nbsp;</div>
+					<div class="col-sm-12 col-md-6">&nbsp;</div>
 					<div class="col-3 text-right">
 						<button type='button' class='btn btn-outline-warning d-block w-100' v-on:click='answer("skip")'>Skip Question</button>
 					</div>
@@ -150,7 +150,7 @@
 				<button type='button' class='d-block w-25 mx-auto btn btn-outline-success' v-on:click='restart()'>Start Again</button>
 
 				<div class='row mt-3' v-if='getIncorrectAnswers.length'>
-					<div v-for='que in getIncorrectAnswers' class='col-6'>
+					<div v-for='que in getIncorrectAnswers' class='col-sm-12 col-md-6'>
 						<strong>Question:</strong> {{que.question}}?<br />
 						<strong>You answered:</strong> <span v-if='!que.answers[que.answered]'>Skipped</span><span v-else>{{que.answers[que.answered]}}</span>.<br />
 						<strong>The correct answer:</strong> {{que.answers[que.correct]}}.<br />
