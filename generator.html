@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>~ Quizzl.me ~</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="https://fonts.googleapis.com/css?family=Indie+Flower|Roboto" rel="stylesheet">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<style>
+		body{
+			background-color: #3BAFDA;
+			color: white;
+			font-family: 'Roboto', sans-serif;
+		}
+
+		a {
+			color: white;
+		}
+
+		h1 {
+			font-family: 'Indie Flower', cursive;
+			font-size: 3em;
+		}
+
+		[v-cloak]{
+			display: none;
+		}
+
+		.settings {
+			border-top: 2px solid white;
+			padding-top: 10px;
+		}
+		
+		.error {
+			border: 2px solid red;
+		}
+
+		footer a {
+			color: white;
+		}
+
+		footer a:hover {
+			color: white;
+			text-decoration: underline;
+		}
+	</style>
+</head>
+<body>
+	
+	<header class='pt-5 pb-5 text-center'>
+		<h1>Quizzl.me Generator</h1>
+	</header>
+
+	<div id='quizzl' class="container">		
+		<p class='text-center'>Welcome to the Quizzl.me generator, use this to generate the questions for the Quizzl.me site.</p>
+			
+		<p class="text-center">You can submit your question set for all users, <a href="#" target="_blank">here</a>.</p>
+
+		<br />
+
+		<h4>Set the quiz settings..</h4><br />
+		
+		<div class="input-group mb-3">
+		  	<div class="input-group-prepend">
+		    	<span class="input-group-text">Quiz Description</span>
+		  	</div>
+		  	<input type="text" class="form-control" v-model="about.description" placeholder="Enter the description for the quiz.">
+		</div>
+
+		<div class="input-group mb-3">
+		  	<div class="input-group-prepend">
+		    	<span class="input-group-text">Quiz Time Limit (Minutes)</span>
+		  	</div>
+		  	<input type="number" class="form-control" pattern="\d*" min="0" v-model="about.timeLimit" placeholder="Length of time in minutes the quiz will run for. (0 for no time limit)">
+		</div>
+
+		<div class="input-group mb-3">
+		  	<div class="input-group-prepend">
+		    	<span class="input-group-text">Question Limit</span>
+		  	</div>
+		  	<input type="number" min="0" pattern="\d*" class="form-control" v-model.number="about.questionLimit" placeholder="Display a certain number of the questions. (0 for no question limit)">
+		</div>
+
+		<div class="input-group mb-3">
+		  	<div class="input-group-prepend">
+		    	<span class="input-group-text">Randomise Questions</span>
+		  	</div>
+		  	<select class="custom-select" v-model="about.randomise" > 
+			    <option value="" selected disabled>Choose...</option>
+			    <option value="false">No</option>
+			    <option value="true">Yes</option>
+		  	</select>
+		</div>
+
+		<div class="input-group mb-3">
+		  	<div class="input-group-prepend">
+		    	<span class="input-group-text">Allow Question Skipping</span>
+		  	</div>
+		  	<select class="custom-select" v-model.boolean="about.allowSkip" >
+			    <option value="" selected disabled>Choose...</option>
+			    <option value="false">No</option>
+			    <option value="true">Yes</option>
+		  	</select>
+		</div>
+
+		<div class="input-group mb-3">
+		  	<div class="input-group-prepend">
+		    	<span class="input-group-text">Allow Going Back</span>
+		  	</div>
+		  	<select class="custom-select" v-model="about.allowBack" >
+			    <option value="" selected disabled>Choose...</option>
+			    <option value="false">No</option>
+			    <option value="true">Yes</option>
+		  	</select>
+		</div>
+
+		<hr class="my-5 d-block" style="background-color: white;">
+		
+		<div class="row">
+			<div class="col-md-6 col-sm-12">
+				<h4>Set the questions..</h4><br />
+			</div>
+			<div class="col-md-6 col-sm-12 text-right">
+				<button type="button" v-on:click="addQuestion" class="btn btn-outline-light">Add Question</button>
+			</div>
+		</div>
+		
+		<ul class="list-group list-group-flush">
+		  	<li class="list-group-item" v-for="qu in quiz">
+		  		
+		  		<div class="row">
+		  			<div class="col-md-6 col-sm-12">
+		  				<div class="input-group mb-3">
+						  	<div class="input-group-prepend">
+						    	<span class="input-group-text">Question</span>
+						  	</div>
+						  	<input type="text" v-model="qu.question" class="form-control" placeholder="Question">
+						</div>
+		  				
+		  				<div class="input-group mb-3">
+						  	<div class="input-group-prepend">
+						    	<span class="input-group-text">Correct Answer</span>
+						  	</div>
+						  	<select class="custom-select" v-model="qu.correct" >
+							    <option value="" selected disabled>Choose...</option>
+							    <option v-for="(ans, ind) in qu.answers" v-bind:value="ind">{{ans}}</option>
+						  	</select>
+						</div>
+		  			</div>
+		  			<div class="col-md-6 col-sm-12">
+		  				
+						<div class="text-right"><button type="button" v-on:click="addAnswer(qu)" class="btn btn-sm btn-outline-dark">Add Answer</button></div>
+						
+						<div class="input-group mt-4" v-for="(ans, ind) in qu.answers">
+						  	<div class="input-group-prepend">
+						    	<span class="input-group-text">Answer</span>
+						  	</div>
+						  	<input type="text" v-model="qu.answers[ind]" class="form-control" placeholder="Question">
+						</div>
+					
+		  			</div>
+		  		</div>
+
+		  	</li>
+		</ul>
+
+		<hr class="my-5 d-block" style="background-color: white;">
+
+		<h4>Get your generated questions..</h4><br />
+
+		<textarea readonly class="d-block w-100">{"about": {{this.about | stringify}}, "quiz": {{this.quiz | stringify}}}</textarea>
+	
+	</div>
+
+	<footer style='background-color: #087CA7;' class='mt-5'>
+		<div class="container pt-3 pb-2 text-center">
+			<p style='font-size: 14px;'>
+				<a href='https://www.quizzl.me'>Quizzl.me</a> 
+				~
+				<a href='https://github.com/stuartajd/quizzl/wiki/Submit-Quizzl-Question-Set' target='_blank'>Submit Official Question Set</a>
+			</p>
+		</div>
+	</footer>
+	
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
+	<script>
+		var Quizzl = new Vue({
+			el: '#quizzl',
+			data: {
+				about: {
+					description: "",
+					timeLimit: "",
+					questionLimit: "",
+					randomise: "",
+					allowSkip: "",
+					allowBack: ""
+				},
+				quiz: []
+			},
+			filters: {
+				stringify: function(value){
+					return JSON.stringify(value);
+				}
+			},
+			methods: {
+				addQuestion: function(){
+					this.quiz.push({ question: "", answers: [""], correct: null });
+				},
+				addAnswer: function(qui){
+					qui.answers.push("");
+				}
+			}
+		});
+	</script>
+
+</body>
+</html>
