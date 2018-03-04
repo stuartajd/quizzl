@@ -99,7 +99,7 @@
 					<h4>{{about.description}}</h4>
 
 					<ul>
-						<li>This quiz has {{quizQuestions.length}} questions<span v-if='about.questionLimit != 0'>, you will only be asked {{about.questionLimit}} questions</span>.</li>
+						<li>This quiz has {{quizQuestions.length}} questions<span v-if='about.questionLimit != 0 && about.questionLimit != quizQuestions.length'>, you will only be asked {{about.questionLimit}} questions</span>.</li>
 						<li>You have {{getTimelimit}} minutes to complete the quiz. After this time your quiz score will be calculated.</li>
 						<li>Skip has been <span v-if='about.allowSkip'>enabled</span><span v-else>disabled</span> for this quiz.</li>
 						<li>Back has been <span v-if='about.allowBack'>enabled</span><span v-else>disabled</span> for this quiz.</li>
@@ -326,9 +326,9 @@
 					this.about.description 	= jsonInput.about.description || 'No description has been set for this quiz.';
 					this.about.timeLimit 	= jsonInput.about.timeLimit || 0;
 					this.about.questionLimit= jsonInput.about.questionLimit || 0;
-					this.about.allowSkip 	= jsonInput.about.allowSkip || false;
-					this.about.allowBack 	= jsonInput.about.allowBack || false;
-					this.about.randomise	= jsonInput.about.randomise || false;
+					this.about.allowSkip 	= JSON.parse(jsonInput.about.allowSkip) || false;
+					this.about.allowBack 	= JSON.parse(jsonInput.about.allowBack) || false;
+					this.about.randomise	= JSON.parse(jsonInput.about.randomise) || false;
 
 					for(let qz of jsonInput.quiz){
 						if(!qz.question.length) return;
@@ -343,6 +343,10 @@
 					        let j = Math.floor(Math.random() * (i + 1));
 					        [this.quiz[i], this.quiz[j]] = [this.quiz[j], this.quiz[i]];
 					    }
+					}
+
+					if(this.about.questionLimit > this.quiz.length){
+						this.about.questionLimit = this.quiz.length;
 					}
 
 					this.status = 'description';
