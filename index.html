@@ -10,9 +10,21 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 	<style>
 		body{
-			background-color: #3BAFDA;
+			padding:0; margin: 0;
+			height:100vh;
 			color: white;
 			font-family: 'Roboto', sans-serif;
+			
+			background-color: #2677b8;			
+		}
+
+		#quizzl {
+			background-color: rgba(0,0,0,0.2);
+    		padding: 2em;
+		}
+
+		header {
+			color: white;
 		}
 
 		a {
@@ -36,22 +48,17 @@
 		.error {
 			border: 2px solid red;
 		}
-
-		footer a {
-			color: white;
-		}
-
-		footer a:hover {
-			color: white;
-			text-decoration: underline;
-		}
 	</style>
 </head>
 <body>
-	
-	<header class='pt-5 pb-5 text-center'>
+	<header class='py-5 text-center'>
 		<h1>Quizzl.me</h1>
 	</header>
+
+	<div class='mb-3 px-0 text-right container'>
+		<a href="https://www.github.com/stuartajd/quizzl" target="_blank" class='btn btn-outline-light btn-sm'><i class="fa fa-github"></i></a>
+		<a href="https://www.quizzl.me/generate" target="_blank" class='btn btn-outline-light btn-sm'>Generate</a>
+	</div>
 
 	<div id='quizzl' class="container">
 		<!-- INTRODUCTION VIEW -->
@@ -129,49 +136,52 @@
 
 				<div class="row mt-1">
 					<div class="col-sm-12 col-md-6" v-for='(ans, ind) in quest.answers'>
-						<button type='button' class='btn btn-outline-light d-block mt-1 w-100' v-on:click='answer(ind)'>{{ans}}</button>
+						<button type='button' class='btn btn-outline-light d-block mb-3 p-3 w-100' v-on:click='answer(ind)'>{{ans}}</button>
 					</div>
 				</div>
 
 				<div class='row mt-3'>
 					<div class="col-3">
-						<button type='button' class='btn btn-outline-danger d-block w-100' v-on:click='back()'>Previous Question</button>
+						<button type='button' v-if='about.allowBack && index != 0' class='btn btn-danger d-block w-100' v-on:click='back()'><i class="fa fa-undo"></i> Back</button>
 					</div>
 					<div class="col-sm-12 col-md-6">&nbsp;</div>
 					<div class="col-3 text-right">
-						<button type='button' class='btn btn-outline-warning d-block w-100' v-on:click='answer("skip")'>Skip Question</button>
+						<button type='button' v-if='about.allowSkip' class='btn btn-warning d-block w-100' v-on:click='answer("skip")'><i class="fa fa-repeat"></i> Skip</button>
 					</div>
 				</div>
 			</div>
 
+			<!-- END OF QUIZ SECTION -->
 			<div v-if='quizEnd'>
 				<h2>5. End the quiz..</h2>
-				<h4 class='text-center'>You got {{calculateScore}} correct out of a possible {{quizQuestions.length}}. That's {{calculatePercent}}%</h4><br />
+
+				<h1 class='text-center'>{{calculatePercent}}%</h1>
+
+				<h3 class='text-center'><i class="fa fa-check-circle text-success"></i> {{calculateScore}} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <i class="fa fa-times-circle text-danger"></i> {{getIncorrectAnswers.length}}</h3>
 					
-				<button type='button' class='d-block w-25 mx-auto btn btn-outline-success' v-on:click='restart()'>Start Again</button>
+				<p class="pt-5"><button type='button' class='d-block w-25 mx-auto btn btn-secondary' v-on:click='restart()'><i class="fa fa-refresh"></i> Restart Quiz</button></p>
 
 				<div class='row mt-3' v-if='getIncorrectAnswers.length'>
 					<div v-for='que in getIncorrectAnswers' class='col-sm-12 col-md-6'>
-						<strong>Question:</strong> {{que.question}}?<br />
-						<strong>You answered:</strong> <span v-if='!que.answers[que.answered]'>Skipped</span><span v-else>{{que.answers[que.answered]}}</span>.<br />
-						<strong>The correct answer:</strong> {{que.answers[que.correct]}}.<br />
-						<hr />
+						
+						<div class="card bg-light text-dark mb-3">
+						  	<div class="card-header">{{que.question}}</div>
+					  		<div class="card-body">
+					    		<p class="card-text"><i class="fa fa-check-circle text-success"></i> {{que.answers[que.correct]}}</p>
+					    		<p class="card-text">
+					    			<span v-if='!que.answers[que.answered]'><i class="fa fa-minus-circle text-warning"></i> Skipped</span>
+					    			<span v-else><i class="fa fa-times-circle text-danger"></i> {{que.answers[que.answered]}}</span>
+					    		</p>
+					  		</div>
+						</div>
+
 					</div>
 				</div>
+
 			</div>
-			
+
 		</div>
 	</div>
-
-	<footer style='background-color: #087CA7;' class='mt-5'>
-		<div class="container pt-3 pb-2 text-center">
-			<p style='font-size: 14px;'>
-				<a href='https://github.com/stuartajd/quizzl' target='_blank'>Quizzl.me</a> 
-				~
-				<a href='https://www.quizzl.me/generate' target='_blank'>Generate Questions</a>
-			</p>
-		</div>
-	</footer>
 	
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js'></script>
 	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.min.js"></script>

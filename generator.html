@@ -10,9 +10,17 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 	<style>
 		body{
-			background-color: #3BAFDA;
+			padding:0; margin: 0;
+			height:100vh;
 			color: white;
 			font-family: 'Roboto', sans-serif;
+			
+			background-color: #2677b8;			
+		}
+
+		#quizzl {
+			background-color: rgba(0,0,0,0.2);
+    		padding: 2em;
 		}
 
 		a {
@@ -49,9 +57,14 @@
 </head>
 <body>
 	
-	<header class='pt-5 pb-5 text-center'>
+	<header class='py-5 text-center'>
 		<h1>Quizzl.me Generator</h1>
 	</header>
+
+	<div class='mb-3 px-0 text-right container'>
+		<a href="https://www.github.com/stuartajd/quizzl" target="_blank" class='btn btn-outline-light btn-sm'><i class="fa fa-github"></i></a>
+		<a href="https://www.quizzl.me/" target="_blank" class='btn btn-outline-light btn-sm'>Quizzl.me</a>
+	</div>
 
 	<div id='quizzl' class="container">		
 		<p class='text-center'>Welcome to the Quizzl.me generator, use this to generate the questions for the Quizzl.me site.</p>
@@ -61,33 +74,33 @@
 		<br />
 
 		<h4>Set the quiz settings..</h4><br />
-		
+
 		<div class="input-group mb-3">
 		  	<div class="input-group-prepend">
 		    	<span class="input-group-text">Quiz Description</span>
 		  	</div>
-		  	<input type="text" class="form-control" v-model="about.description" placeholder="Enter the description for the quiz.">
+		  	<input type="text" class="form-control" required v-model="about.description" placeholder="Enter the description for the quiz." >
 		</div>
 
 		<div class="input-group mb-3">
 		  	<div class="input-group-prepend">
 		    	<span class="input-group-text">Quiz Time Limit (Minutes)</span>
 		  	</div>
-		  	<input type="number" class="form-control" pattern="\d*" min="0" v-model="about.timeLimit" placeholder="Length of time in minutes the quiz will run for. (0 for no time limit)">
+		  	<input type="number" class="form-control" required pattern="\d*" min="0" v-model="about.timeLimit" placeholder="Length of time in minutes the quiz will run for. (0 for no time limit)">
 		</div>
 
 		<div class="input-group mb-3">
 		  	<div class="input-group-prepend">
 		    	<span class="input-group-text">Question Limit</span>
 		  	</div>
-		  	<input type="number" min="0" pattern="\d*" class="form-control" v-model.number="about.questionLimit" placeholder="Display a certain number of the questions. (0 for no question limit)">
+		  	<input type="number" min="0" pattern="\d*" required class="form-control" v-model.number="about.questionLimit" placeholder="Display a certain number of the questions. (0 for no question limit)">
 		</div>
 
 		<div class="input-group mb-3">
 		  	<div class="input-group-prepend">
 		    	<span class="input-group-text">Randomise Questions</span>
 		  	</div>
-		  	<select class="custom-select" v-model="about.randomise" > 
+		  	<select class="custom-select" required v-model="about.randomise" > 
 			    <option value="" selected disabled>Choose...</option>
 			    <option value="false">No</option>
 			    <option value="true">Yes</option>
@@ -98,7 +111,7 @@
 		  	<div class="input-group-prepend">
 		    	<span class="input-group-text">Allow Question Skipping</span>
 		  	</div>
-		  	<select class="custom-select" v-model.boolean="about.allowSkip" >
+		  	<select class="custom-select" required v-model.boolean="about.allowSkip" >
 			    <option value="" selected disabled>Choose...</option>
 			    <option value="false">No</option>
 			    <option value="true">Yes</option>
@@ -109,7 +122,7 @@
 		  	<div class="input-group-prepend">
 		    	<span class="input-group-text">Allow Going Back</span>
 		  	</div>
-		  	<select class="custom-select" v-model="about.allowBack" >
+		  	<select class="custom-select" required v-model="about.allowBack" >
 			    <option value="" selected disabled>Choose...</option>
 			    <option value="false">No</option>
 			    <option value="true">Yes</option>
@@ -129,21 +142,27 @@
 		
 		<ul class="list-group list-group-flush">
 		  	<li class="list-group-item" v-for="qu in quiz">
-		  		
 		  		<div class="row">
 		  			<div class="col-md-6 col-sm-12">
 		  				<div class="input-group mb-3">
 						  	<div class="input-group-prepend">
 						    	<span class="input-group-text">Question</span>
 						  	</div>
-						  	<input type="text" v-model="qu.question" class="form-control" placeholder="Question">
+						  	<input type="text" required v-model="qu.question" class="form-control" placeholder="Question">
+						</div>
+
+						<div class="input-group mb-3">
+						  	<div class="input-group-prepend">
+						    	<span class="input-group-text">Image</span>
+						  	</div>
+						  	<input type="text" v-model="qu.image" class="form-control" placeholder="Image">
 						</div>
 		  				
 		  				<div class="input-group mb-3">
 						  	<div class="input-group-prepend">
 						    	<span class="input-group-text">Correct Answer</span>
 						  	</div>
-						  	<select class="custom-select" v-model="qu.correct" >
+						  	<select class="custom-select" required v-model="qu.correct" >
 							    <option value="" selected disabled>Choose...</option>
 							    <option v-for="(ans, ind) in qu.answers" v-bind:value="ind">{{ans}}</option>
 						  	</select>
@@ -162,8 +181,8 @@
 					
 		  			</div>
 		  		</div>
-
 		  	</li>
+		  	<div v-if='!quiz.length' class='text-center'><h5>Add your first question!</h5></div>
 		</ul>
 
 		<hr class="my-5 d-block" style="background-color: white;">
@@ -173,18 +192,8 @@
 		<textarea readonly class="d-block w-100">{"about": {{this.about | stringify}}, "quiz": {{this.quiz | stringify}}}</textarea>
 	
 	</div>
-
-	<footer style='background-color: #087CA7;' class='mt-5'>
-		<div class="container pt-3 pb-2 text-center">
-			<p style='font-size: 14px;'>
-				<a href='https://www.quizzl.me'>Quizzl.me</a> 
-				~
-				<a href='https://github.com/stuartajd/quizzl/wiki/Submit-Quizzl-Question-Set' target='_blank'>Submit Official Question Set</a>
-			</p>
-		</div>
-	</footer>
 	
-	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.min.js"></script>
 	<script>
 		var Quizzl = new Vue({
 			el: '#quizzl',
